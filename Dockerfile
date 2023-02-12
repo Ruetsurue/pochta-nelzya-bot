@@ -4,4 +4,5 @@ WORKDIR /pochta_nelzya_bot
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 COPY . .
-CMD ["python", "run.py"]
+#CMD ["python", "run.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:80", "run:app"]
