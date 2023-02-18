@@ -2,6 +2,8 @@ import logging
 import os
 
 from dotenv import load_dotenv
+from telebot.async_telebot import AsyncTeleBot
+from telebot.types import Message
 
 
 def configure_logging():
@@ -16,3 +18,8 @@ def configure_logging():
 def log_cmd(user, command):
     message = f"{user} {command}"
     logging.debug(message)
+
+
+async def log_state(bot: AsyncTeleBot, message: Message):
+    state = await bot.get_state(message.from_user.id, message.chat.id)
+    logging.debug(f'Current bot state of user {message.from_user.username}: {state}')

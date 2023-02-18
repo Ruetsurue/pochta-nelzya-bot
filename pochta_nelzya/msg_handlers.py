@@ -7,7 +7,7 @@ from telebot.asyncio_filters import StateFilter
 from pochta_nelzya.msg_texts import MessageTexts as mt, KeyboardButtonCaptions as cpt
 from pochta_nelzya.msg_formatters import get_all_records_for_n_days
 from pochta_nelzya.models import FeedDogModel, WalkDogModel
-from pochta_nelzya.logs import log_cmd
+from pochta_nelzya.logs import log_cmd, log_state
 from pochta_nelzya.states import MenuStates, FeedDogStates, ShowRecordsStates
 from pochta_nelzya.keyboards import BotKeyboards
 
@@ -18,6 +18,7 @@ async def add_handlers(bot: AsyncTeleBot):
     @bot.message_handler(commands=['start'])
     async def cmd_start(message: Message):
         log_cmd(message.from_user.username, message.text)
+        await log_state(bot, message)
         await bot.send_message(message.chat.id, mt.START_MSG)
         await bot.reply_to(message, text=mt.MENU_MSG, reply_markup=BotKeyboards.main_menu_markup())
         await bot.set_state(user_id=message.from_user.id, state=MenuStates.user_selected_option,
@@ -26,6 +27,7 @@ async def add_handlers(bot: AsyncTeleBot):
     @bot.message_handler(state=MenuStates.user_requested_menu)
     async def show_menu(message: Message):
         log_cmd(message.from_user.username, message.text)
+        await log_state(bot, message)
 
         # reset bot context each time a new operation is invoked to clear previous operations' leftovers
         await bot.reset_data(message.from_user.id, message.chat.id)
@@ -37,6 +39,7 @@ async def add_handlers(bot: AsyncTeleBot):
     @bot.message_handler(state=MenuStates.user_selected_option)
     async def execute_selected_option(message: Message):
         log_cmd(message.from_user.username, message.text)
+        await log_state(bot, message)
 
         if message.text == cpt.FEED:
             await start_feed_msg_chain(message=message)
@@ -57,12 +60,16 @@ async def add_handlers(bot: AsyncTeleBot):
             await start_show_record_msg_chain(message=message)
 
     async def start_feed_msg_chain(message: Message):
+        logging.debug('start_feed_msg_chain')
+        await log_state(bot, message)
         await bot.reply_to(message, text=mt.ASK_FEED_PORTION_SIZE_MSG,
                            reply_markup=BotKeyboards.feed_portion_size_options_markup())
         await bot.set_state(message.from_user.id, FeedDogStates.user_enters_portion_size, message.chat.id)
 
     @bot.message_handler(state=FeedDogStates.user_enters_portion_size)
     async def process_portion_size_and_save(message: Message):
+        logging.debug('process_portion_size_and_save')
+        await log_state(bot, message)
         keyboard = BotKeyboards.finish_operation_and_return_to_menu_markup()
         state = MenuStates.user_requested_menu
 
@@ -88,12 +95,17 @@ async def add_handlers(bot: AsyncTeleBot):
         await bot.set_state(user_id=message.from_user.id, state=state, chat_id=message.chat.id)
 
     async def start_show_record_msg_chain(message: Message):
+        logging.debug('start_show_record_msg_chain')
+        await log_state(bot, message)
         await bot.reply_to(message, text=mt.ASK_RECORD_PERIOD_MSG,
                            reply_markup=BotKeyboards.show_records_for_num_days_markup())
         await bot.set_state(message.from_user.id, ShowRecordsStates.process_timeperiod_selection, message.chat.id)
 
     @bot.message_handler(state=ShowRecordsStates.process_timeperiod_selection)
     async def process_timeperiod_selection(message: Message):
+        logging.debug('process_timeperiod_selection')
+        await log_state(bot, message)
+
         async with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             model = data['use_model']
             msg_template = data['msg_template']
@@ -122,6 +134,8 @@ async def add_handlers(bot: AsyncTeleBot):
     async def start_walk_msg_chain(message: Message):
         by_whom = message.from_user.username
         log_cmd(by_whom, message.text)
+        logging.debug('start_walk_msg_chain')
+        await log_state(bot, message)
 
         walk = WalkDogModel(by_whom=by_whom)
         logging.debug(walk)
