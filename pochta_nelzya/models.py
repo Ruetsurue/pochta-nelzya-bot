@@ -2,7 +2,7 @@ import os
 import datetime
 
 from dotenv import load_dotenv
-from sqlalchemy import Column, String, DateTime, Integer, desc
+from sqlalchemy import Column, String, DateTime, Integer
 from sqlalchemy.sql import select
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -39,7 +39,7 @@ class BaseModel(Base):
     @classmethod
     async def get_last_n_days(cls, n_days):
         n_days_ago = datetime.datetime.now() - datetime.timedelta(days=n_days)
-        statement = select(cls).where(cls.time_at > n_days_ago).order_by(desc(cls.time_at))
+        statement = select(cls).where(cls.time_at > n_days_ago).order_by(cls.time_at)
         async with AsyncSession(async_engine) as session:
             result = await session.execute(statement)
 
@@ -47,7 +47,7 @@ class BaseModel(Base):
 
     @classmethod
     async def get_all_records(cls):
-        statement = select(cls).order_by(desc(cls.time_at))
+        statement = select(cls).order_by(cls.time_at)
         async with AsyncSession(async_engine) as session:
             result = await session.execute(statement)
 
