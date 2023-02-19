@@ -13,7 +13,10 @@ async def setup_routes(app: FastAPI, bot: AsyncTeleBot):
         await bot.remove_webhook()
         webhook_url = f"{os.getenv('WEBHOOK_URL_PREFIX')}/{os.getenv('BOT_TOKEN')}"
         await asyncio.sleep(0.1)
-        await bot.set_webhook(url=webhook_url)
+        await bot.set_webhook(url=webhook_url,
+                              drop_pending_updates=True,
+                              max_connections=3,
+                              allowed_updates=['message'])
         logging.info('Bot successfully launched')
         return
 
