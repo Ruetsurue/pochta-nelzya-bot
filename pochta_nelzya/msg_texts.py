@@ -13,13 +13,13 @@ class MessageTexts:
 
     ALL_FEEDINGS_HEADER = "Все кормления: \n"
     FEED_RECORD = "Когда: {time_at}\n" \
-                  "Кто: @{by_whom}\n" \
+                  "Кто: {by_whom}\n" \
                   "Грамм: {portion_size}"
     ALL_FEEDINGS_MSG = (ALL_FEEDINGS_HEADER, FEED_RECORD)
 
     ALL_WALKS_HEADER = f"Все выгуливания: \n"
     WALK_RECORD = "Когда: {time_at}\n" \
-                  "Кто: @{by_whom}"
+                  "Кто: {by_whom}"
     ALL_WALKS_MSG = (ALL_WALKS_HEADER, WALK_RECORD)
 
     NOT_DIGIT_ERR = "Это не число. Введи число"

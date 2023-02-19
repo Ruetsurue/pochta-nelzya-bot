@@ -4,6 +4,7 @@ import pytz
 
 from dotenv import load_dotenv
 from typing import TypeVar
+from telebot.types import Message
 
 import pochta_nelzya.models as m
 
@@ -41,3 +42,16 @@ async def get_all_records_for_n_days(model: MODEL_TYPES, msg_template: tuple[str
 
     response = '\n\n'.join(response_lines)
     return response
+
+
+def get_message_author(message: Message) -> str:
+    """
+    Get message author. If username is set, it will be returned. Otherwise returns first name + last name (if set)
+    :param message:
+    :return:
+    """
+    if message.from_user.username:
+        username = message.from_user.username
+        return f"@{username}"
+
+    return message.from_user.full_name

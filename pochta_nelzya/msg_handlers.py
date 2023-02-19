@@ -5,7 +5,7 @@ from telebot.types import Message
 from telebot.asyncio_filters import StateFilter
 
 from pochta_nelzya.msg_texts import MessageTexts as mt, KeyboardButtonCaptions as cpt
-from pochta_nelzya.msg_formatters import get_all_records_for_n_days
+from pochta_nelzya.msg_formatters import get_all_records_for_n_days, get_message_author
 from pochta_nelzya.models import FeedDogModel, WalkDogModel
 from pochta_nelzya.logs import log_cmd, log_state
 from pochta_nelzya.states import MenuStates, FeedDogStates, ShowRecordsStates
@@ -77,7 +77,7 @@ async def add_handlers(bot: AsyncTeleBot):
             text = mt.RETURN_TO_MENU_MSG
 
         elif message.text.isdigit():
-            by_whom, portion_size = message.from_user.username, message.text
+            by_whom, portion_size = get_message_author(message), message.text
             log_cmd(by_whom, message.text)
             feeding = FeedDogModel(by_whom=by_whom, portion_size=portion_size)
             logging.debug(feeding)
@@ -132,7 +132,7 @@ async def add_handlers(bot: AsyncTeleBot):
         await bot.set_state(user_id=message.from_user.id, state=MenuStates.user_requested_menu, chat_id=message.chat.id)
 
     async def start_walk_msg_chain(message: Message):
-        by_whom = message.from_user.username
+        by_whom = get_message_author(message)
         log_cmd(by_whom, message.text)
         logging.debug('start_walk_msg_chain')
         await log_state(bot, message)
