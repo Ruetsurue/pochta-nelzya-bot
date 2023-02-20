@@ -11,6 +11,10 @@ from pochta_nelzya.logs import configure_logging
 
 
 class Bot:
+    """
+    Bot wrapper class. Mainly needed to create placeholder for bot in the global app context before the fastapi async
+    event loop kicks in. When it does, the placeholder is filled with the actual bot on the fastapi startup event.
+    """
     def __init__(self):
         self._bot: Optional[AsyncTeleBot] = None
 

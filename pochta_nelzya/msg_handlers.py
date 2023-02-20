@@ -6,6 +6,7 @@ from telebot.asyncio_filters import StateFilter
 
 from pochta_nelzya.msg_texts import MessageTexts as mt, KeyboardButtonCaptions as cpt
 from pochta_nelzya.msg_formatters import get_all_records_for_n_days, get_message_author
+from pochta_nelzya.msg_waits import wait_before_reply
 from pochta_nelzya.models import FeedDogModel, WalkDogModel
 from pochta_nelzya.logs import log_cmd, log_state
 from pochta_nelzya.states import MenuStates, FeedDogStates, ShowRecordsStates
@@ -16,6 +17,7 @@ async def add_handlers(bot: AsyncTeleBot):
     bot.add_custom_filter(custom_filter=StateFilter(bot))
 
     @bot.message_handler(commands=['start'])
+    @wait_before_reply
     async def cmd_start(message: Message):
         log_cmd(message.from_user.username, message.text)
         await log_state(bot, message)
@@ -25,6 +27,7 @@ async def add_handlers(bot: AsyncTeleBot):
                             chat_id=message.chat.id)
 
     @bot.message_handler(state=MenuStates.user_requested_menu)
+    @wait_before_reply
     async def show_menu(message: Message):
         log_cmd(message.from_user.username, message.text)
         await log_state(bot, message)
@@ -59,6 +62,7 @@ async def add_handlers(bot: AsyncTeleBot):
                 data['msg_template'] = mt.ALL_WALKS_MSG
             await start_show_record_msg_chain(message=message)
 
+    @wait_before_reply
     async def start_feed_msg_chain(message: Message):
         logging.debug('start_feed_msg_chain')
         await log_state(bot, message)
@@ -67,6 +71,7 @@ async def add_handlers(bot: AsyncTeleBot):
         await bot.set_state(message.from_user.id, FeedDogStates.user_enters_portion_size, message.chat.id)
 
     @bot.message_handler(state=FeedDogStates.user_enters_portion_size)
+    @wait_before_reply
     async def process_portion_size_and_save(message: Message):
         logging.debug('process_portion_size_and_save')
         await log_state(bot, message)
@@ -94,6 +99,7 @@ async def add_handlers(bot: AsyncTeleBot):
         await bot.reply_to(message, text=text, reply_markup=keyboard)
         await bot.set_state(user_id=message.from_user.id, state=state, chat_id=message.chat.id)
 
+    @wait_before_reply
     async def start_show_record_msg_chain(message: Message):
         logging.debug('start_show_record_msg_chain')
         await log_state(bot, message)
@@ -102,6 +108,7 @@ async def add_handlers(bot: AsyncTeleBot):
         await bot.set_state(message.from_user.id, ShowRecordsStates.process_timeperiod_selection, message.chat.id)
 
     @bot.message_handler(state=ShowRecordsStates.process_timeperiod_selection)
+    @wait_before_reply
     async def process_timeperiod_selection(message: Message):
         logging.debug('process_timeperiod_selection')
         await log_state(bot, message)
@@ -131,6 +138,7 @@ async def add_handlers(bot: AsyncTeleBot):
         await bot.reply_to(message, text=text, reply_markup=BotKeyboards.finish_operation_and_return_to_menu_markup())
         await bot.set_state(user_id=message.from_user.id, state=MenuStates.user_requested_menu, chat_id=message.chat.id)
 
+    @wait_before_reply
     async def start_walk_msg_chain(message: Message):
         by_whom = get_message_author(message)
         log_cmd(by_whom, message.text)
